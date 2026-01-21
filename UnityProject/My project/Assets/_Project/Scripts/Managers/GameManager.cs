@@ -5,7 +5,7 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
 
-    void Awake()
+    private void Awake()
     {
         if (instance == null)
             instance = this;
@@ -15,6 +15,13 @@ public class GameManager : MonoBehaviour
 
     public void PlayerDied()
     {
-        SceneManager.LoadScene("Lose");
+        Debug.Log("Game Over");
+
+        Invoke(nameof(RestartLevel), 2f);
+    }
+
+    private void RestartLevel()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }
