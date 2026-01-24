@@ -1,33 +1,31 @@
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 
 public class Locker : MonoBehaviour
 {
     [Header("Références")]
-    [SerializeField] private GameObject micro;
+    [SerializeField] private GameObject micro;        // objet dans la scène
     [SerializeField] private Animator animator;
     [SerializeField] private TextMeshProUGUI interactText;
+    [SerializeField] private Image microUI;          // icône dans le HUD
 
     [Header("Détection")]
     [SerializeField] private Vector3 detectionSize = new Vector3(1f, 2f, 1f);
-    [SerializeField] private LayerMask detectionLayer = ~0; // tous les layers par défaut
+    [SerializeField] private LayerMask detectionLayer = ~0;
 
     private bool isOpen = false;
 
     private void Awake()
     {
-        Debug.Log($"[Locker] Script actif sur {gameObject.name}");
         if (micro != null) micro.SetActive(false);
         if (interactText != null) interactText.gameObject.SetActive(false);
+        if (microUI != null) microUI.gameObject.SetActive(false);
     }
 
     private void Update()
     {
-        // Détection du joueur avec OverlapBox
         Collider[] hits = Physics.OverlapBox(transform.position, detectionSize / 2, Quaternion.identity, detectionLayer);
-
-        // Debug pour voir combien de colliders sont détectés
-        Debug.Log($"[Locker] Nombre de hits : {hits.Length}");
 
         bool playerDetected = false;
 
@@ -37,14 +35,12 @@ public class Locker : MonoBehaviour
             {
                 playerDetected = true;
 
-                // Affichage du texte
                 if (!isOpen && interactText != null)
                 {
                     interactText.text = "Appuyez sur E pour ouvrir";
                     interactText.gameObject.SetActive(true);
                 }
 
-                // Ouverture du casier
                 if (Input.GetKeyDown(KeyCode.E) && !isOpen)
                 {
                     OpenLocker();
@@ -52,24 +48,22 @@ public class Locker : MonoBehaviour
             }
         }
 
-        // Masquer le texte si aucun joueur détecté
         if (!playerDetected && interactText != null)
-        {
             interactText.gameObject.SetActive(false);
-        }
     }
 
     private void OpenLocker()
     {
         isOpen = true;
 
-        Debug.Log("[Locker] Casier ouvert !");
-
         if (animator != null)
-            animator.SetTrigger("OpenLocker");
+            animator.SetTrigger("OpenLocker");  // clip non loopé
 
         if (micro != null)
-            micro.SetActive(true);
+            micro.SetActive(true); 
+
+        if (microUI != null)
+            microUI.gameObject.SetActive(true); // visible dans le HUD
 
         if (interactText != null)
         {
@@ -78,9 +72,18 @@ public class Locker : MonoBehaviour
         }
 
         if (GameManager.instance != null)
-        {
             GameManager.instance.hasMicro = true;
-        }
+    }
+
+    public void CollectMicro()
+    {
+        Debug.Log("CollectMicro appelée");
+
+        if (micro != null)
+            micro.SetActive(false);
+
+        if (microUI != null)
+            microUI.gameObject.SetActive(true);
     }
 
     private void HideText()
@@ -89,7 +92,6 @@ public class Locker : MonoBehaviour
             interactText.gameObject.SetActive(false);
     }
 
-    // Dessine le cube de détection pour debug
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.green;
