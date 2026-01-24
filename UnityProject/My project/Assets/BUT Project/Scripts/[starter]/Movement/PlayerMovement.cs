@@ -155,6 +155,7 @@ namespace BUT
         public void SetInputMove(InputAction.CallbackContext _context)
         {
             m_MovementInput = _context.ReadValue<Vector2>();
+            Debug.Log("Input: " + m_MovementInput);
         }
 
         public void SetInputJump(InputAction.CallbackContext _context)
@@ -179,7 +180,7 @@ namespace BUT
             IsSprinting = _context.started || _context.performed;
         }
 
-        [SerializeField] float m_SpeedMultiplier = 3.5f;
+        [SerializeField] float m_SpeedMultiplier = 4f;
         private void ManageDirection()
         {
             // set direction
