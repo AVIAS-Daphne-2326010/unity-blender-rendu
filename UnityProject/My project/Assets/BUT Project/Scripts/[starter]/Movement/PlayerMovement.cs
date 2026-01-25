@@ -180,7 +180,7 @@ namespace BUT
             IsSprinting = _context.started || _context.performed;
         }
 
-        [SerializeField] float m_SpeedMultiplier = 4f;
+        [SerializeField] float m_SpeedMultiplier = 5f;
         private void ManageDirection()
         {
             // set direction
