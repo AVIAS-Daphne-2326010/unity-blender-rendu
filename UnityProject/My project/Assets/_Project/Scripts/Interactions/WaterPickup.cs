@@ -1,20 +1,36 @@
 using UnityEngine;
 
+[RequireComponent(typeof(AudioSource))]
 public class WaterPickup : MonoBehaviour
 {
     public int value = 1;
-    public AudioClip pickupSound;
 
-    void OnTriggerEnter(Collider other)
+    private AudioSource audioSource;
+    private bool collected = false;
+
+    private void Awake()
     {
+        audioSource = GetComponent<AudioSource>();
+        audioSource.playOnAwake = false;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (collected) return;
+
         if (other.CompareTag("Player"))
         {
-            ScoreManager.instance.AddScore(value);
+            collected = true;
 
-            if (pickupSound)
-                AudioSource.PlayClipAtPoint(pickupSound, transform.position);
+            if (ScoreManager.instance != null)
+                ScoreManager.instance.AddScore(value);
 
-            Destroy(gameObject);
+            audioSource.Play();
+
+            GetComponent<Collider>().enabled = false;
+            GetComponent<MeshRenderer>().enabled = false;
+
+            Destroy(gameObject, audioSource.clip.length);
         }
     }
 }

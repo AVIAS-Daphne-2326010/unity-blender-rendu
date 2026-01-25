@@ -1,14 +1,27 @@
 using UnityEngine;
 using TMPro;
 
+[RequireComponent(typeof(AudioSource))]
 public class MoneyPickup : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI winText; // texte "Vous avez gagné !"
+    [SerializeField] private TextMeshProUGUI winText; 
+
+    private AudioSource audioSource;
+    private bool collected = false;
+
+    private void Awake()
+    {
+        audioSource = GetComponent<AudioSource>();
+        audioSource.playOnAwake = false;
+    }
 
     private void OnTriggerEnter(Collider other)
     {
+        if (collected) return;
+
         if (other.CompareTag("Player"))
         {
+            collected = true;
             Debug.Log("Argent récupéré !");
 
             // Affichage du texte de victoire
@@ -18,12 +31,19 @@ public class MoneyPickup : MonoBehaviour
                 winText.gameObject.SetActive(true);
             }
 
-            // Appeler GameManager pour marquer la victoire
+            // Victoire
             if (GameManager.instance != null)
                 GameManager.instance.WinGame();
 
-            // Désactiver l'objet argent pour qu'il disparaisse
-            gameObject.SetActive(false);
+            // Jouer le son
+            audioSource.Play();
+
+            // Désactiver visuellement l'argent
+            GetComponent<Collider>().enabled = false;
+            GetComponent<MeshRenderer>().enabled = false;
+
+            // Détruire après la fin du son
+            Destroy(gameObject, audioSource.clip.length);
         }
     }
 }
