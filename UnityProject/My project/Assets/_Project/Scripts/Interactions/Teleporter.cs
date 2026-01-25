@@ -7,7 +7,10 @@ public class Teleporter : MonoBehaviour
     [Header("Destination")]
     [SerializeField] private Transform destination;
 
-    private bool canTeleport = true; 
+    [Header("Effets visuels")]
+    [SerializeField] private ParticleSystem teleportParticles; // Particules du téléporteur
+
+    private bool canTeleport = true;
 
     private void OnTriggerEnter(Collider other)
     {
@@ -17,6 +20,11 @@ public class Teleporter : MonoBehaviour
         {
             if (GameManager.instance != null && GameManager.instance.hasMicro)
             {
+                // Jouer les particules avant la téléportation
+                if (teleportParticles != null)
+                    teleportParticles.Play();
+
+                // Téléportation
                 CharacterController cc = other.GetComponent<CharacterController>();
                 if (cc != null)
                 {
@@ -35,7 +43,6 @@ public class Teleporter : MonoBehaviour
                 canTeleport = false;
                 StartCoroutine(ResetTeleportCooldown());
             }
-
             else
             {
                 Debug.Log("Téléporteur bloqué : récupérez le micro !");
@@ -51,7 +58,7 @@ public class Teleporter : MonoBehaviour
 
     private IEnumerator ResetTeleportCooldown()
     {
-        yield return new WaitForSeconds(0.5f); 
+        yield return new WaitForSeconds(0.5f);
         canTeleport = true;
     }
 }
