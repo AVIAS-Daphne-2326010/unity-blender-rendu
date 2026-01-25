@@ -4,8 +4,6 @@ using TMPro;
 [RequireComponent(typeof(AudioSource))]
 public class MoneyPickup : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI winText; 
-
     private AudioSource audioSource;
     private bool collected = false;
 
@@ -22,16 +20,8 @@ public class MoneyPickup : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             collected = true;
-            Debug.Log("Argent récupéré !");
+            Debug.Log("Butin récupéré !");
 
-            // Affichage du texte de victoire
-            if (winText != null)
-            {
-                winText.text = "Vous avez gagné !";
-                winText.gameObject.SetActive(true);
-            }
-
-            // Victoire
             if (GameManager.instance != null)
                 GameManager.instance.WinGame();
 

@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using TMPro; // Pour le texte UI
+using TMPro; 
 
 public class GameManager : MonoBehaviour
 {
@@ -8,7 +8,8 @@ public class GameManager : MonoBehaviour
     public bool hasMicro = false;
 
     [Header("UI")]
-    [SerializeField] private TextMeshProUGUI winText; // assigner dans l’inspecteur
+    [SerializeField] private GameObject startPanel;
+    [SerializeField] private GameObject victoryPanel;
 
     private void Awake()
     {
@@ -16,9 +17,19 @@ public class GameManager : MonoBehaviour
             instance = this;
         else
             Destroy(gameObject);
+    }
 
-        if (winText != null)
-            winText.gameObject.SetActive(false);
+    private void Start()
+    {
+        startPanel.SetActive(true);
+        victoryPanel.SetActive(false);
+        Time.timeScale = 0f;
+    }
+
+    public void StartGame()
+    {
+        startPanel.SetActive(false);
+        Time.timeScale = 1f;
     }
 
     public void PlayerDied()
@@ -32,16 +43,22 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
-    // Appelée quand le joueur récupère l'argent
     public void WinGame()
     {
         Debug.Log("Partie gagnée !");
-        if (winText != null)
-        {
-            winText.text = "Partie gagnée !";
-            winText.gameObject.SetActive(true);
-        }
+        victoryPanel.SetActive(true);
+        Time.timeScale = 0f;
+    }
 
-        // Optionnel : bloquer les contrôles du joueur, téléporteur, etc.
+    public void Replay()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+
+    public void QuitGame()
+    {
+        Application.Quit();
     }
 }
