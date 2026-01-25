@@ -1,14 +1,16 @@
+// Locker.cs
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using System.Collections;
 
 public class Locker : MonoBehaviour
 {
     [Header("Références")]
-    [SerializeField] private GameObject micro;        // objet dans la scène
+    [SerializeField] private GameObject micro;        // objet micro dans la scène
     [SerializeField] private Animator animator;
     [SerializeField] private TextMeshProUGUI interactText;
-    [SerializeField] private Image microUI;          // icône dans le HUD
+    [SerializeField] private Image microUI;          // icône micro dans le HUD
 
     [Header("Détection")]
     [SerializeField] private Vector3 detectionSize = new Vector3(1f, 2f, 1f);
@@ -26,7 +28,6 @@ public class Locker : MonoBehaviour
     private void Update()
     {
         Collider[] hits = Physics.OverlapBox(transform.position, detectionSize / 2, Quaternion.identity, detectionLayer);
-
         bool playerDetected = false;
 
         foreach (Collider hit in hits)
@@ -43,7 +44,7 @@ public class Locker : MonoBehaviour
 
                 if (Input.GetKeyDown(KeyCode.E) && !isOpen)
                 {
-                    OpenLocker();
+                    StartCoroutine(OpenLockerAfterAnimation());
                 }
             }
         }
@@ -52,18 +53,31 @@ public class Locker : MonoBehaviour
             interactText.gameObject.SetActive(false);
     }
 
-    private void OpenLocker()
+    private IEnumerator OpenLockerAfterAnimation()
     {
         isOpen = true;
 
         if (animator != null)
-            animator.SetTrigger("OpenLocker");  // clip non loopé
+            animator.SetTrigger("OpenLocker");
 
+        // Activer le micro dans la scène **pendant l'animation**
         if (micro != null)
-            micro.SetActive(true); 
+            micro.SetActive(true);
+
+        // Optionnel : microUI reste désactivé pour ne pas apparaître avant récupération
+        if (microUI != null)
+            microUI.gameObject.SetActive(false);
+
+        // Attendre la fin de l'animation avant de "récupérer" le micro
+        float animationLength = animator.GetCurrentAnimatorStateInfo(0).length;
+        yield return new WaitForSeconds(animationLength);
+
+        // Après l'animation : désactiver micro dans la scène et activer le HUD
+        if (micro != null)
+            micro.SetActive(false);
 
         if (microUI != null)
-            microUI.gameObject.SetActive(true); // visible dans le HUD
+            microUI.gameObject.SetActive(true);
 
         if (interactText != null)
         {
@@ -75,16 +89,6 @@ public class Locker : MonoBehaviour
             GameManager.instance.hasMicro = true;
     }
 
-    public void CollectMicro()
-    {
-        Debug.Log("CollectMicro appelée");
-
-        if (micro != null)
-            micro.SetActive(false);
-
-        if (microUI != null)
-            microUI.gameObject.SetActive(true);
-    }
 
     private void HideText()
     {
