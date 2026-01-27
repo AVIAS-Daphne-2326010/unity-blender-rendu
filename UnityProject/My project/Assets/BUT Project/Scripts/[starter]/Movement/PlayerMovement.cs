@@ -8,7 +8,14 @@ namespace BUT
     [RequireComponent(typeof(CharacterController))]
     public class PlayerMovement : MonoBehaviour
     {
-        [SerializeField]
+        [Header("Footsteps")]
+        [SerializeField] private AudioSource m_FootstepSource;
+        [SerializeField] private float m_WalkStepInterval = 0.45f;
+        [SerializeField] private float m_SprintStepInterval = 0.3f;
+
+        private float m_FootstepTimer;
+
+        [SerializeField] 
         Movement m_Movement;
 
         float m_CurrentSpeed;
@@ -93,6 +100,10 @@ namespace BUT
         private void Awake()
         {
             m_CharacterController = GetComponent<CharacterController>();
+            if (m_FootstepSource == null)
+            {
+                m_FootstepSource = GetComponent<AudioSource>();
+            }
         }
 
         public void MovingChanged(bool _moving)
@@ -150,6 +161,7 @@ namespace BUT
                 // Même sans mouvement, applique la gravité
                 ApplyMovement();
             }
+            HandleFootsteps();
         }
 
         public void SetInputMove(InputAction.CallbackContext _context)
@@ -239,6 +251,27 @@ namespace BUT
                 // if not grounded add gravity
                 GravityVelocity += GRAVITY * m_Movement.GravityMultiplier * Time.deltaTime;
             }
+        }
+
+        private void HandleFootsteps()
+        {
+            // conditions pour jouer des pas
+            if (!IsMoving || !m_CharacterController.isGrounded)
+            {
+                m_FootstepTimer = 0f;
+                return;
+            }
+
+            m_FootstepTimer += Time.deltaTime;
+
+            float interval = IsSprinting ? m_SprintStepInterval : m_WalkStepInterval;
+
+            if (m_FootstepTimer >= interval)
+            {
+                m_FootstepSource.Play();
+                m_FootstepTimer = 0f;
+            }
+            if (m_FootstepSource == null) return;
         }
     }
 }
